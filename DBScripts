@@ -1,0 +1,105 @@
+-- =====================================================
+-- ORDER MANAGEMENT SYSTEM - COMPLETE DB SCRIPT
+-- PostgreSQL
+-- =====================================================
+
+-- =====================================================
+-- 1. CREATE DATABASE
+-- =====================================================
+
+CREATE DATABASE order_management;
+
+-- Connect to database manually after creation:
+-- \c order_management;
+
+
+-- =====================================================
+-- 2. CUSTOMERS TABLE
+-- =====================================================
+
+CREATE TABLE customers (
+
+    id BIGSERIAL PRIMARY KEY,
+
+    name VARCHAR(255) NOT NULL,
+
+    email VARCHAR(255) UNIQUE NOT NULL,
+
+    address TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- =====================================================
+-- 3. ORDERS TABLE
+-- =====================================================
+
+CREATE TABLE orders (
+
+    id BIGSERIAL PRIMARY KEY,
+
+    customer_id BIGINT NOT NULL,
+
+    order_date TIMESTAMP NOT NULL,
+
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+
+    total_value NUMERIC(12,2) DEFAULT 0,
+
+    deleted BOOLEAN DEFAULT FALSE,
+
+    version BIGINT DEFAULT 0,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_orders_customer
+        FOREIGN KEY(customer_id)
+        REFERENCES customers(id)
+);
+
+
+-- =====================================================
+-- 4. ORDER ITEMS TABLE
+-- =====================================================
+
+CREATE TABLE order_items (
+
+    id BIGSERIAL PRIMARY KEY,
+
+    order_id BIGINT NOT NULL,
+
+    product_name VARCHAR(255) NOT NULL,
+
+    price NUMERIC(12,2) NOT NULL,
+
+    quantity INTEGER NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_order_items_order
+        FOREIGN KEY(order_id)
+        REFERENCES orders(id)
+        ON DELETE CASCADE
+);
+
+
+-- =====================================================
+-- 5. INDEXES
+-- =====================================================
+
+CREATE INDEX idx_orders_customer_id
+ON orders(customer_id);
+
+CREATE INDEX idx_orders_status
+ON orders(status);
+
+CREATE INDEX idx_orders_deleted
+ON orders(deleted);
+
+CREATE INDEX idx_order_items_order_id
+ON order_items(order_id);
